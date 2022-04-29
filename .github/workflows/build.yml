@@ -1,0 +1,47 @@
+name: Build
+on:
+  push
+
+jobs:
+  Build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: '>1.17.0'
+
+      - name: Install dependencies
+        run: |
+          go version
+          go get -v
+        
+      - name: Run Build
+        run: go build .
+
+      - name: Set release var.
+        run: echo "::set-output name=release::$(cat VERSION)-$(echo ${GITHUB_RUN_NUMBER:-dev})"
+        id: release
+
+      - name: Release version
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.release.outputs.release }}
+          release_name: ${{ steps.release.outputs.release }}
+          draft: false
+          prerelease: false
+
+      - name: Upload binary
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./ecr-image-lister
+          asset_name: ecr-image-lister
+          asset_content_type: application/octet-stream
