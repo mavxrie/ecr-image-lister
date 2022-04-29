@@ -40,6 +40,7 @@ func fetchTags(ecrClient *ecr.ECR, repositoryName string) ([]string, error) {
 
 func main() {
 	regionPtr := flag.String("region", "", "The AWS region to list images from")
+	outputFilePtr := flag.String("out", "", "The file to output to. Leave empty for stdout")
 	flag.Parse()
 
 	awsRegion := *regionPtr
@@ -95,5 +96,13 @@ func main() {
 		})
 	}
 
-	imageListToMarkdown(images)
+	var out = os.Stdout
+	if *outputFilePtr != "" {
+		out, err = os.OpenFile(*outputFilePtr, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+		if err != nil {
+			log.Fatalln(err)
+		}
+	}
+
+	imageListToMarkdown(out, images)
 }
