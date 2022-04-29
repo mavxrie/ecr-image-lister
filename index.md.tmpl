@@ -1,5 +1,6 @@
 # Docker images
 
+{{ if . -}}
 ## Last versions
 
 {{- range $value := . }}
@@ -10,4 +11,7 @@
 
 {{- range $value := . }}
 - {{.Name}}: {{ if .Versions }}{{ .Versions }}{{ else }}{{ .RawTags }}{{ end }}
+{{- end }}
+{{- else -}}
+No image was found.
 {{- end }}

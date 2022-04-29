@@ -1,7 +1,9 @@
 package main
 
 import (
+	"flag"
 	"log"
+	"os"
 	"sort"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -37,8 +39,20 @@ func fetchTags(ecrClient *ecr.ECR, repositoryName string) ([]string, error) {
 }
 
 func main() {
+	regionPtr := flag.String("region", "", "The AWS region to list images from")
+	flag.Parse()
+
+	awsRegion := *regionPtr
+
+	if awsRegion == "" {
+		awsRegion = os.Getenv("AWS_DEFAULT_REGION")
+		if awsRegion == "" {
+			awsRegion = "us-east-1"
+		}
+	}
+
 	awsSession, err := session.NewSession(&aws.Config{
-		Region: aws.String("us-east-1"),
+		Region: aws.String(awsRegion),
 	})
 	if err != nil {
 		log.Fatal(err)
