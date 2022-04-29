@@ -70,14 +70,14 @@ func versionSort(versions []*Version) {
 	sort.Sort(Versions(versions))
 }
 
-func (v Version) toString() string {
+func (v Version) String() string {
 	return fmt.Sprintf("%d.%d.%d-%d", v.major, v.minor, v.patch, v.build)
 }
 
 func versionString(versions []*Version) string {
 	entries := []string{}
 	for _, v := range versions {
-		entries = append(entries, v.toString())
+		entries = append(entries, v.String())
 	}
 
 	return strings.Join(entries, ", ")

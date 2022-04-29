@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"sort"
 
@@ -9,6 +8,12 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ecr"
 )
+
+type Image struct {
+	Name     string
+	Versions Versions
+	RawTags  []string
+}
 
 func fetchTags(ecrClient *ecr.ECR, repositoryName string) ([]string, error) {
 	names := []string{}
@@ -51,30 +56,30 @@ func main() {
 		return *repositories.Repositories[i].RepositoryName < *repositories.Repositories[j].RepositoryName
 	})
 
+	images := []Image{}
+
 	for _, repository := range repositories.Repositories {
 		tags, err := fetchTags(ecrClient, *repository.RepositoryName)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		allTagsValid := true
-
 		versionTags := []*Version{}
 		for _, tag := range tags {
 			parsedTag, err := parseVersion(tag)
-			if err != nil {
-				allTagsValid = false
-			} else {
+			if err == nil {
 				versionTags = append(versionTags, &parsedTag)
 			}
 		}
 
 		versionSort(versionTags)
 
-		if allTagsValid {
-			fmt.Printf("%s: %v\n", *repository.RepositoryName, versionString(versionTags))
-		} else {
-			fmt.Printf("%s: %v\n", *repository.RepositoryName, tags)
-		}
+		images = append(images, Image{
+			Name:     *repository.RepositoryName,
+			Versions: versionTags,
+			RawTags:  tags,
+		})
 	}
+
+	imageListToMarkdown(images)
 }
