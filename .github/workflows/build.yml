@@ -22,7 +22,7 @@ jobs:
         run: go build .
 
       - name: Set release var.
-        run: echo "::set-output name=release::$(cat VERSION)-$(echo ${GITHUB_RUN_NUMBER:-dev})+$(echo ${GITHUB_RUN_ID:''})"
+        run: echo "::set-output name=release::$(cat VERSION)-$(echo ${GITHUB_RUN_NUMBER:-dev})+$(echo ${GITHUB_RUN_ID})"
         id: release
 
       - name: Release version
