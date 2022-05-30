@@ -17,12 +17,12 @@ jobs:
         run: |
           go version
           go get -v
-        
+
       - name: Run Build
         run: go build .
 
       - name: Set release var.
-        run: echo "::set-output name=release::$(cat VERSION)-$(echo ${GITHUB_RUN_NUMBER:-dev})"
+        run: echo "::set-output name=release::$(cat VERSION)+$(echo ${GITHUB_RUN_NUMBER:-dev})"
         id: release
 
       - name: Release version
